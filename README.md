@@ -63,6 +63,7 @@ ret, err := order.NewOrder(&order.NewOrderReq{
     Symbol: "PEPE_USDT",
     Amount: "0.009",
 })
+...
 ```
 
 ## TODO 
