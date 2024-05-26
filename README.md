@@ -26,7 +26,7 @@ create signer by your ApiKey
 ```go
 signer := api.NewSigner(
     "{Your API Key}",
-    "{Your API Secret",
+    "{Your API Secret}",
 )
 ```
 
