@@ -37,7 +37,7 @@ func (a *Api[Req, Res]) createRequest(query url.Values, body io.ReadCloser) (*ht
 	return req, nil
 }
 
-func (a *Api[Req, Res]) Do(param Req) (*Ret[Res], error) {
+func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *http.Client) (*Ret[Res], error) {
 	if client == nil {
 		return nil, errors.New("http client is invalid")
 	}
@@ -61,7 +61,7 @@ func (a *Api[Req, Res]) Do(param Req) (*Ret[Res], error) {
 	if err != nil {
 		return nil, err
 	}
-	if code := res.StatusCode; code >= 200 && code <= 300 {
+	if code := res.StatusCode; code >= 200 && code < 300 {
 		ret := new(Ret[Res])
 		if err := jsoniter.Unmarshal(b, ret); err != nil {
 			return nil, err

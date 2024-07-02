@@ -30,19 +30,12 @@ signer := api.NewSigner(
 )
 ```
 
-init api by singer and http client
-
-```go
-api.WithSinger(signer)
-api.WithHttpClient(http.DefaultClient)
-```
-
 market interface
 
 ```go
-ret, err := market.GetSymbols(&market.SymbolsReq{
-    Symbols: "",
-    Type:    "",
+mkt := market.NewMarket(http.DefaultClient)
+ret,err := mkt.GetSymbols(&SymbolsReq{
+	//todo
 })
 ...
 ```
@@ -50,14 +43,16 @@ ret, err := market.GetSymbols(&market.SymbolsReq{
 account interface
 
 ```go
-ret, err := account.BalancesInfo()
+acc := account.NewAccount(sign,http.DefaultClient)
+ret, err := acc.BalancesInfo()
 ...
 ```
 
 order interface
 
 ```go
-ret, err := order.NewOrder(&order.NewOrderReq{
+trans := order.NewTrans(sign,http.DefaultClient)
+ret, err := trans.NewOrder(&order.NewOrderReq{
     Side: "BUY",
     Type: "MARKET",
     Symbol: "PEPE_USDT",

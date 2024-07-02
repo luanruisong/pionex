@@ -18,13 +18,8 @@ const (
 )
 
 var (
-	sign   *Singer
 	client *http.Client
 )
-
-func WithSinger(signer *Singer) {
-	sign = signer
-}
 
 func WithHttpClient(c *http.Client) {
 	client = c

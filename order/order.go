@@ -127,6 +127,11 @@ type (
 	CancelAllOrdersReq struct {
 		Symbol string `json:"symbol"`
 	}
+
+	Trans struct {
+		s *api.Singer
+		c *http.Client
+	}
 )
 
 var (
@@ -183,51 +188,58 @@ var (
 )
 
 // NewOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/new-order
-func NewOrder(req *NewOrderReq) (*api.Ret[*NewOrderRes], error) {
-	return newOrder.Do(req)
+func (t *Trans) NewOrder(req *NewOrderReq) (*api.Ret[*NewOrderRes], error) {
+	return newOrder.Do(req, t.s, t.c)
 }
 
 // NewMultipleOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/new-multiple-order
-func NewMultipleOrder(req *NewMultipleOrderReq) (*api.Ret[*NewMultipleOrderRes], error) {
-	return newMultipleOrder.Do(req)
+func (t *Trans) NewMultipleOrder(req *NewMultipleOrderReq) (*api.Ret[*NewMultipleOrderRes], error) {
+	return newMultipleOrder.Do(req, t.s, t.c)
 }
 
 // CancelOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/cancel-order
-func CancelOrder(req *CancelOrderReq) (*api.Ret[struct{}], error) {
-	return cancelOrder.Do(req)
+func (t *Trans) CancelOrder(req *CancelOrderReq) (*api.Ret[struct{}], error) {
+	return cancelOrder.Do(req, t.s, t.c)
 }
 
 // GetOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/get-order
-func GetOrder(req *GetOrderReq) (*api.Ret[*GetOrderRes], error) {
-	return getOrder.Do(req)
+func (t *Trans) GetOrder(req *GetOrderReq) (*api.Ret[*GetOrderRes], error) {
+	return getOrder.Do(req, t.s, t.c)
 }
 
 // GetOrderByClientId https://pionex-doc.gitbook.io/apidocs/restful/orders/get-order-by-client-order-id
-func GetOrderByClientId(req *GetOrderByClientIdReq) (*api.Ret[*GetOrderRes], error) {
-	return getOrderByClientId.Do(req)
+func (t *Trans) GetOrderByClientId(req *GetOrderByClientIdReq) (*api.Ret[*GetOrderRes], error) {
+	return getOrderByClientId.Do(req, t.s, t.c)
 }
 
 // GetOpenOrders https://pionex-doc.gitbook.io/apidocs/restful/orders/get-open-orders
-func GetOpenOrders(req *GetOpenOrdersReq) (*api.Ret[*OrdersRes], error) {
-	return getOpenOrders.Do(req)
+func (t *Trans) GetOpenOrders(req *GetOpenOrdersReq) (*api.Ret[*OrdersRes], error) {
+	return getOpenOrders.Do(req, t.s, t.c)
 }
 
 // GetAllOrders https://pionex-doc.gitbook.io/apidocs/restful/orders/get-all-orders
-func GetAllOrders(req *GetAllOrdersReq) (*api.Ret[*OrdersRes], error) {
-	return getAllOrders.Do(req)
+func (t *Trans) GetAllOrders(req *GetAllOrdersReq) (*api.Ret[*OrdersRes], error) {
+	return getAllOrders.Do(req, t.s, t.c)
 }
 
 // GetFills https://pionex-doc.gitbook.io/apidocs/restful/orders/get-fills
-func GetFills(req *GetFillsReq) (*api.Ret[*GetFillsRes], error) {
-	return getFills.Do(req)
+func (t *Trans) GetFills(req *GetFillsReq) (*api.Ret[*GetFillsRes], error) {
+	return getFills.Do(req, t.s, t.c)
 }
 
 // GetFillsByOrderId https://pionex-doc.gitbook.io/apidocs/restful/orders/get-fills-by-order-id
-func GetFillsByOrderId(req *GetFillsByOrderIdeq) (*api.Ret[*GetFillsRes], error) {
-	return getFillsByOrderId.Do(req)
+func (t *Trans) GetFillsByOrderId(req *GetFillsByOrderIdeq) (*api.Ret[*GetFillsRes], error) {
+	return getFillsByOrderId.Do(req, t.s, t.c)
 }
 
 // CancelAllOrders https://pionex-doc.gitbook.io/apidocs/restful/orders/cancel-all-orders
-func CancelAllOrders(req *CancelAllOrdersReq) (*api.Ret[struct{}], error) {
-	return cancelAllOrders.Do(req)
+func (t *Trans) CancelAllOrders(req *CancelAllOrdersReq) (*api.Ret[struct{}], error) {
+	return cancelAllOrders.Do(req, t.s, t.c)
+}
+
+func NewTrans(s *api.Singer, c *http.Client) *Trans {
+	return &Trans{
+		s: s,
+		c: c,
+	}
 }

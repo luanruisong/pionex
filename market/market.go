@@ -120,6 +120,10 @@ type (
 	GetKlineRes struct {
 		Klines []Kline `json:"klines"`
 	}
+
+	Market struct {
+		c *http.Client
+	}
 )
 
 var (
@@ -161,31 +165,35 @@ var (
 )
 
 // MarketData https://pionex-doc.gitbook.io/apidocs/restful/common/market-data
-func GetSymbols(req *SymbolsReq) (*api.Ret[*SymbolsRes], error) {
-	return symbols.Do(req)
+func (m *Market) GetSymbols(req *SymbolsReq) (*api.Ret[*SymbolsRes], error) {
+	return symbols.Do(req, nil, m.c)
 }
 
 // GetDepth https://pionex-doc.gitbook.io/apidocs/restful/markets/get-depth
-func GetDepth(req *SymbolReq) (*api.Ret[*GetDepthRes], error) {
-	return getDepth.Do(req)
+func (m *Market) GetDepth(req *SymbolReq) (*api.Ret[*GetDepthRes], error) {
+	return getDepth.Do(req, nil, m.c)
 }
 
 // GetTrades https://pionex-doc.gitbook.io/apidocs/restful/markets/get-trades
-func GetTrades(req *SymbolReq) (*api.Ret[*GetTradesRes], error) {
-	return getTrades.Do(req)
+func (m *Market) GetTrades(req *SymbolReq) (*api.Ret[*GetTradesRes], error) {
+	return getTrades.Do(req, nil, m.c)
 }
 
 // Get24hrTicker https://pionex-doc.gitbook.io/apidocs/restful/markets/get-24hr-ticker
-func Get24hrTicker(req *TickerReq) (*api.Ret[*Get24hrTickerRes], error) {
-	return get24hrTicker.Do(req)
+func (m *Market) Get24hrTicker(req *TickerReq) (*api.Ret[*Get24hrTickerRes], error) {
+	return get24hrTicker.Do(req, nil, m.c)
 }
 
 // GetBookTicker https://pionex-doc.gitbook.io/apidocs/restful/markets/get-book-ticker
-func GetBookTicker(req *TickerReq) (*api.Ret[*GetBookTickerRes], error) {
-	return getBookTicker.Do(req)
+func (m *Market) GetBookTicker(req *TickerReq) (*api.Ret[*GetBookTickerRes], error) {
+	return getBookTicker.Do(req, nil, m.c)
 }
 
 // GetKline https://pionex-doc.gitbook.io/apidocs/restful/markets/get-klines
-func GetKline(req *GetKlineReq) (*api.Ret[*GetKlineRes], error) {
-	return getKline.Do(req)
+func (m *Market) GetKline(req *GetKlineReq) (*api.Ret[*GetKlineRes], error) {
+	return getKline.Do(req, nil, m.c)
+}
+
+func NewMarket(c *http.Client) *Market {
+	return &Market{c: c}
 }

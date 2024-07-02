@@ -14,6 +14,11 @@ type (
 	BalancesRes struct {
 		Balances []Balance `json:"balances"`
 	}
+
+	Account struct {
+		s *api.Singer
+		c *http.Client
+	}
 )
 
 var (
@@ -24,6 +29,13 @@ var (
 )
 
 // BalancesInfo https://pionex-doc.gitbook.io/apidocs/restful/account/get-balance
-func BalancesInfo() (*api.Ret[*BalancesRes], error) {
-	return balancesInfo.Do(nil)
+func (a *Account) BalancesInfo() (*api.Ret[*BalancesRes], error) {
+	return balancesInfo.Do(nil, a.s, a.c)
+}
+
+func NewAccount(s *api.Singer, c *http.Client) *Account {
+	return &Account{
+		s: s,
+		c: c,
+	}
 }
