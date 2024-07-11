@@ -2,6 +2,7 @@ package market
 
 import (
 	"github.com/luanruisong/pionex/api"
+	"github.com/valyala/fasthttp"
 	"net/http"
 )
 
@@ -122,7 +123,7 @@ type (
 	}
 
 	Market struct {
-		c *http.Client
+		c *fasthttp.Client
 	}
 )
 
@@ -194,6 +195,6 @@ func (m *Market) GetKline(req *GetKlineReq) (*api.Ret[*GetKlineRes], error) {
 	return getKline.Do(req, nil, m.c)
 }
 
-func NewMarket(c *http.Client) *Market {
+func NewMarket(c *fasthttp.Client) *Market {
 	return &Market{c: c}
 }

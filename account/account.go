@@ -2,6 +2,7 @@ package account
 
 import (
 	"github.com/luanruisong/pionex/api"
+	"github.com/valyala/fasthttp"
 	"net/http"
 )
 
@@ -17,7 +18,7 @@ type (
 
 	Account struct {
 		s *api.Singer
-		c *http.Client
+		c *fasthttp.Client
 	}
 )
 
@@ -33,7 +34,7 @@ func (a *Account) BalancesInfo() (*api.Ret[*BalancesRes], error) {
 	return balancesInfo.Do(nil, a.s, a.c)
 }
 
-func NewAccount(s *api.Singer, c *http.Client) *Account {
+func NewAccount(s *api.Singer, c *fasthttp.Client) *Account {
 	return &Account{
 		s: s,
 		c: c,

@@ -2,6 +2,7 @@ package order
 
 import (
 	"github.com/luanruisong/pionex/api"
+	"github.com/valyala/fasthttp"
 	"net/http"
 )
 
@@ -130,7 +131,7 @@ type (
 
 	Trans struct {
 		s *api.Singer
-		c *http.Client
+		c *fasthttp.Client
 	}
 )
 
@@ -237,7 +238,7 @@ func (t *Trans) CancelAllOrders(req *CancelAllOrdersReq) (*api.Ret[struct{}], er
 	return cancelAllOrders.Do(req, t.s, t.c)
 }
 
-func NewTrans(s *api.Singer, c *http.Client) *Trans {
+func NewTrans(s *api.Singer, c *fasthttp.Client) *Trans {
 	return &Trans{
 		s: s,
 		c: c,

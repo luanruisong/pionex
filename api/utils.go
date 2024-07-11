@@ -1,12 +1,10 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
-	"io"
+	"github.com/valyala/fasthttp"
 	"net/http"
-	"net/url"
 	"reflect"
 )
 
@@ -17,42 +15,36 @@ const (
 	Host    = "https://api.pionex.com"
 )
 
-var (
-	client *http.Client
-)
-
-func WithHttpClient(c *http.Client) {
-	client = c
-}
-
-func ParseRequestData(method string, data any) (url.Values, io.ReadCloser) {
-	switch method {
+func (a *Api[Req, Res]) preParseRequest(req *fasthttp.Request, data any) {
+	req.Header.SetMethod(a.Method)
+	req.SetRequestURI(Host)
+	u := req.URI()
+	u.SetPath(a.Path)
+	switch a.Method {
 	case http.MethodPost, http.MethodDelete:
 		b, _ := jsoniter.Marshal(data)
-		return url.Values{}, io.NopCloser(bytes.NewReader(b))
+		req.SetBody(b)
 	}
 	v := reflect.ValueOf(data)
 	switch v.Kind() {
 	case reflect.Ptr:
-		if v.IsNil() {
-			return url.Values{}, nil
+		if !v.IsNil() {
+			return
 		}
 		v = v.Elem()
 	case reflect.Invalid:
-		return url.Values{}, nil
+		return
 	}
-	if v.IsZero() {
-		return url.Values{}, nil
-	}
-	var u = url.Values{}
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Type().Field(i)
-		fv := fmt.Sprintf("%v", v.Field(i).Interface())
-		if tag := field.Tag.Get("form"); len(tag) > 0 {
-			u.Add(tag, fv)
-			continue
+	if !v.IsZero() {
+		arg := u.QueryArgs()
+		for i := 0; i < v.NumField(); i++ {
+			field := v.Type().Field(i)
+			fv := fmt.Sprintf("%v", v.Field(i).Interface())
+			if tag := field.Tag.Get("form"); len(tag) > 0 {
+				arg.Add(tag, fv)
+				continue
+			}
+			arg.Add(field.Name, fv)
 		}
-		u.Add(field.Name, fv)
 	}
-	return u, nil
 }

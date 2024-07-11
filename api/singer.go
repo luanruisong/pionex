@@ -6,11 +6,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/valyala/fasthttp"
 	"hash"
-	"io"
-	"net/http"
-	"net/url"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -21,39 +20,29 @@ type (
 	}
 )
 
-func (a *Singer) SignReq(r *http.Request) {
-	u := r.URL
-	query := u.Query()
-	var b []byte
-	if r.Body != nil {
-		b, _ = io.ReadAll(r.Body)
-		r.Body = io.NopCloser(bytes.NewReader(b))
-	}
-	signStr := a.Sign(r.Method, u.Path, query, b)
-	r.URL.RawQuery = query.Encode()
+func (a *Singer) SignReq(r *fasthttp.Request) {
+	u := r.URI()
+	method := string(r.Header.Method())
+	path := string(u.Path())
+	signStr := a.Sign(method, path, u.QueryArgs(), r.Body())
 	r.Header.Add(SignKey, signStr)
 	r.Header.Add(ApiKey, a.ApiKey)
 }
 
-func (a *Singer) Sign(method, path string, query url.Values, body []byte) string {
+func (a *Singer) Sign(method, path string, queryArg *fasthttp.Args, body []byte) string {
 	ts := fmt.Sprintf("%d", time.Now().UnixMilli())
-	query.Add(TsKey, ts)
+	queryArg.Add(TsKey, ts)
 	sb := &bytes.Buffer{}
 	sb.WriteString(method)
 	sb.WriteString(path)
 	sb.WriteString("?")
-	qs := make([]string, 0, len(query))
-	for i := range query {
-		qs = append(qs, i)
-	}
+	qs := make([]string, 0, queryArg.Len())
+	queryArg.VisitAll(func(key, value []byte) {
+		qs = append(qs, fmt.Sprintf("%s=%s", string(key), string(value)))
+	})
 	if len(qs) > 0 {
 		sort.Strings(qs)
-		for i, v := range qs {
-			if i > 0 {
-				sb.WriteString("&")
-			}
-			sb.WriteString(fmt.Sprintf("%s=%s", v, query.Get(v)))
-		}
+		sb.WriteString(strings.Join(qs, "&"))
 	}
 	if body != nil {
 		sb.Write(body)

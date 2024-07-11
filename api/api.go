@@ -3,9 +3,7 @@ package api
 import (
 	"errors"
 	jsoniter "github.com/json-iterator/go"
-	"io"
-	"net/http"
-	"net/url"
+	"github.com/valyala/fasthttp"
 )
 
 type (
@@ -23,50 +21,34 @@ type (
 	}
 )
 
-func (a *Api[Req, Res]) createRequest(query url.Values, body io.ReadCloser) (*http.Request, error) {
-	u, err := url.Parse(Host)
-	if err != nil {
-		return nil, err
-	}
-	u.RawQuery = query.Encode()
-	u.Path = a.Path
-	req, err := http.NewRequest(a.Method, u.String(), body)
-	if err != nil {
-		return nil, err
-	}
-	return req, nil
-}
-
-func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *http.Client) (*Ret[Res], error) {
+func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*Ret[Res], error) {
 	if client == nil {
 		return nil, errors.New("http client is invalid")
 	}
-	query, body := ParseRequestData(a.Method, param)
-	req, err := a.createRequest(query, body)
-	if err != nil {
-		return nil, err
-	}
+	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req)
+	a.preParseRequest(req, param)
 	if !a.PublicInterface {
 		if sign == nil {
 			return nil, errors.New("signer is invalid")
 		}
 		sign.SignReq(req)
 	}
-	res, err := client.Do(req)
+	resp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(resp)
+	if err := client.Do(req, resp); err != nil {
+		return nil, err
+	}
+	body, err := resp.BodyUncompressed()
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	if code := res.StatusCode; code >= 200 && code < 300 {
+	if code := resp.StatusCode(); code >= 200 && code < 300 {
 		ret := new(Ret[Res])
-		if err := jsoniter.Unmarshal(b, ret); err != nil {
+		if err = jsoniter.Unmarshal(body, ret); err != nil {
 			return nil, err
 		}
 		return ret, nil
 	}
-	return nil, errors.New(string(b))
+	return nil, errors.New(string(body))
 }
