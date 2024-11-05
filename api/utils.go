@@ -21,14 +21,15 @@ func (a *Api[Req, Res]) preParseRequest(req *fasthttp.Request, data any) {
 	u := req.URI()
 	u.SetPath(a.Path)
 	switch a.Method {
-	case http.MethodPost, http.MethodDelete:
+	case http.MethodPost, http.MethodPut:
 		b, _ := jsoniter.Marshal(data)
 		req.SetBody(b)
+		return
 	}
 	v := reflect.ValueOf(data)
 	switch v.Kind() {
 	case reflect.Ptr:
-		if !v.IsNil() {
+		if v.IsNil() {
 			return
 		}
 		v = v.Elem()
