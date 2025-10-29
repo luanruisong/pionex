@@ -19,6 +19,10 @@ var (
 	formEncoder *form.Encoder
 )
 
+func SetHost(host string) {
+	Host = host
+}
+
 func init() {
 	formEncoder = form.NewEncoder()
 }
