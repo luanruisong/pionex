@@ -1,20 +1,21 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/go-playground/form/v4"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
-	"net/http"
 )
 
 const (
 	TsKey   = "timestamp"
 	SignKey = "PIONEX-SIGNATURE"
 	ApiKey  = "PIONEX-KEY"
-	Host    = "https://api.pionex.com"
 )
 
 var (
+	Host        = "https://api.pionex.com"
 	formEncoder *form.Encoder
 )
 

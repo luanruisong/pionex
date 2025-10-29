@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
 )
@@ -50,5 +51,5 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 		}
 		return ret, nil
 	}
-	return nil, errors.New(string(body))
+	return nil, errors.New(fmt.Sprintf("http response status:%d, error: %s", resp.StatusCode(), string(body)))
 }
