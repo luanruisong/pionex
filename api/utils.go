@@ -41,5 +41,6 @@ func (a *Api[Req, Res]) preParseRequest(req *fasthttp.Request, data any) {
 	case http.MethodPost, http.MethodPut, http.MethodDelete:
 		b, _ := jsoniter.Marshal(data)
 		req.SetBody(b)
+		req.Header.SetContentType("application/json")
 	}
 }
