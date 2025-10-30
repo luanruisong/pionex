@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
 )
@@ -12,6 +13,7 @@ type (
 		Method          string
 		Path            string
 		PublicInterface bool
+		CurlHook        func(string)
 	}
 	Ret[T any] struct {
 		Result    bool   `json:"result"`
@@ -34,6 +36,9 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 			return nil, errors.New("signer is invalid")
 		}
 		sign.SignReq(req)
+	}
+	if a.CurlHook != nil {
+		a.CurlHook(curlHook(req))
 	}
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
