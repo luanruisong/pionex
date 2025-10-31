@@ -14,6 +14,7 @@ type (
 		Path            string
 		PublicInterface bool
 		CurlHook        func(string)
+		RespHook        func(string)
 	}
 	Ret[T any] struct {
 		Result    bool   `json:"result"`
@@ -48,6 +49,9 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 	body, err := resp.BodyUncompressed()
 	if err != nil {
 		return nil, err
+	}
+	if a.RespHook != nil {
+		a.RespHook(body)
 	}
 	if code := resp.StatusCode(); code >= 200 && code < 300 {
 		ret := new(Ret[Res])
