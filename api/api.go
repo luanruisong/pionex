@@ -50,8 +50,8 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 	if err != nil {
 		return nil, err
 	}
-	if a.RespHook != nil {
-		a.RespHook(body)
+	if a.RespHook != nil && len(body) > 0 {
+		a.RespHook(string(body))
 	}
 	if code := resp.StatusCode(); code >= 200 && code < 300 {
 		ret := new(Ret[Res])
