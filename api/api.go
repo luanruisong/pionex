@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/luanruisong/pionex/api/hooks"
 	"github.com/valyala/fasthttp"
 )
 
@@ -13,8 +14,7 @@ type (
 		Method          string
 		Path            string
 		PublicInterface bool
-		CurlHook        func(string)
-		RespHook        func(string)
+		before, after   *hooks.Hooks
 	}
 	Ret[T any] struct {
 		Result    bool   `json:"result"`
@@ -38,9 +38,8 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 		}
 		sign.SignReq(req)
 	}
-	if a.CurlHook != nil {
-		a.CurlHook(curlHook(req))
-	}
+	a.before.Hook(req, nil)
+
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 	if err := client.Do(req, resp); err != nil {
@@ -50,9 +49,7 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 	if err != nil {
 		return nil, err
 	}
-	if a.RespHook != nil && len(body) > 0 {
-		a.RespHook(string(body))
-	}
+	a.after.Hook(req, resp)
 	if code := resp.StatusCode(); code >= 200 && code < 300 {
 		ret := new(Ret[Res])
 		if err = jsoniter.Unmarshal(body, ret); err != nil {
@@ -61,4 +58,18 @@ func (a *Api[Req, Res]) Do(param Req, sign *Singer, client *fasthttp.Client) (*R
 		return ret, nil
 	}
 	return nil, errors.New(fmt.Sprintf("http response status:%d, error: %s", resp.StatusCode(), string(body)))
+}
+
+func (a *Api[Req, Res]) HookBefore(hook hooks.Hook) {
+	if a.before == nil {
+		a.before = new(hooks.Hooks)
+	}
+	a.before.Add(hook)
+}
+
+func (a *Api[Req, Res]) HookAfter(hook hooks.Hook) {
+	if a.after == nil {
+		a.after = new(hooks.Hooks)
+	}
+	a.after.Add(hook)
 }
