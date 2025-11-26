@@ -6,11 +6,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"hash"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
 type (
@@ -21,6 +22,9 @@ type (
 )
 
 func (a *Singer) SignReq(r *fasthttp.Request) {
+	if a == nil {
+		return
+	}
 	u := r.URI()
 	method := string(r.Header.Method())
 	path := string(u.Path())

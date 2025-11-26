@@ -1,9 +1,10 @@
 package order
 
 import (
+	"net/http"
+
 	"github.com/luanruisong/pionex/api"
 	"github.com/valyala/fasthttp"
-	"net/http"
 )
 
 type (
@@ -130,117 +131,132 @@ type (
 	}
 
 	Trans struct {
-		s *api.Singer
-		c *fasthttp.Client
+		newOrder           *api.Api[*NewOrderReq, *NewOrderRes]
+		newMultipleOrder   *api.Api[*NewMultipleOrderReq, *NewMultipleOrderRes]
+		cancelOrder        *api.Api[*CancelOrderReq, struct{}]
+		getOrder           *api.Api[*GetOrderReq, *GetOrderRes]
+		getOrderByClientId *api.Api[*GetOrderByClientIdReq, *GetOrderRes]
+		getOpenOrders      *api.Api[*GetOpenOrdersReq, *OrdersRes]
+		getAllOrders       *api.Api[*GetAllOrdersReq, *OrdersRes]
+		getFills           *api.Api[*GetFillsReq, *GetFillsRes]
+		getFillsByOrderId  *api.Api[*GetFillsByOrderIdeq, *GetFillsRes]
+		cancelAllOrders    *api.Api[*CancelAllOrdersReq, struct{}]
 	}
 )
 
-var (
-	// apis
-	newOrder = &api.Api[*NewOrderReq, *NewOrderRes]{
-		Method: http.MethodPost,
-		Path:   "/api/v1/trade/order",
-	}
-
-	newMultipleOrder = &api.Api[*NewMultipleOrderReq, *NewMultipleOrderRes]{
-		Method: http.MethodPost,
-		Path:   "/api/v1/trade/massOrder",
-	}
-
-	cancelOrder = &api.Api[*CancelOrderReq, struct{}]{
-		Method: http.MethodDelete,
-		Path:   "/api/v1/trade/order",
-	}
-
-	getOrder = &api.Api[*GetOrderReq, *GetOrderRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/trade/order",
-	}
-
-	getOrderByClientId = &api.Api[*GetOrderByClientIdReq, *GetOrderRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/trade/orderByClientOrderId",
-	}
-
-	getOpenOrders = &api.Api[*GetOpenOrdersReq, *OrdersRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/trade/openOrders",
-	}
-
-	getAllOrders = &api.Api[*GetAllOrdersReq, *OrdersRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/trade/allOrders",
-	}
-
-	getFills = &api.Api[*GetFillsReq, *GetFillsRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/trade/fills",
-	}
-
-	getFillsByOrderId = &api.Api[*GetFillsByOrderIdeq, *GetFillsRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/trade/fillsByOrderId",
-	}
-
-	cancelAllOrders = &api.Api[*CancelAllOrdersReq, struct{}]{
-		Method: http.MethodDelete,
-		Path:   "/api/v1/trade/allOrders",
-	}
-)
+var ()
 
 // NewOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/new-order
 func (t *Trans) NewOrder(req *NewOrderReq) (*api.Ret[*NewOrderRes], error) {
-	return newOrder.Do(req, t.s, t.c)
+	return t.newOrder.Do(req)
 }
 
 // NewMultipleOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/new-multiple-order
 func (t *Trans) NewMultipleOrder(req *NewMultipleOrderReq) (*api.Ret[*NewMultipleOrderRes], error) {
-	return newMultipleOrder.Do(req, t.s, t.c)
+	return t.newMultipleOrder.Do(req)
 }
 
 // CancelOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/cancel-order
 func (t *Trans) CancelOrder(req *CancelOrderReq) (*api.Ret[struct{}], error) {
-	return cancelOrder.Do(req, t.s, t.c)
+	return t.cancelOrder.Do(req)
 }
 
 // GetOrder https://pionex-doc.gitbook.io/apidocs/restful/orders/get-order
 func (t *Trans) GetOrder(req *GetOrderReq) (*api.Ret[*GetOrderRes], error) {
-	return getOrder.Do(req, t.s, t.c)
+	return t.getOrder.Do(req)
 }
 
 // GetOrderByClientId https://pionex-doc.gitbook.io/apidocs/restful/orders/get-order-by-client-order-id
 func (t *Trans) GetOrderByClientId(req *GetOrderByClientIdReq) (*api.Ret[*GetOrderRes], error) {
-	return getOrderByClientId.Do(req, t.s, t.c)
+	return t.getOrderByClientId.Do(req)
 }
 
 // GetOpenOrders https://pionex-doc.gitbook.io/apidocs/restful/orders/get-open-orders
 func (t *Trans) GetOpenOrders(req *GetOpenOrdersReq) (*api.Ret[*OrdersRes], error) {
-	return getOpenOrders.Do(req, t.s, t.c)
+	return t.getOpenOrders.Do(req)
 }
 
 // GetAllOrders https://pionex-doc.gitbook.io/apidocs/restful/orders/get-all-orders
 func (t *Trans) GetAllOrders(req *GetAllOrdersReq) (*api.Ret[*OrdersRes], error) {
-	return getAllOrders.Do(req, t.s, t.c)
+	return t.getAllOrders.Do(req)
 }
 
 // GetFills https://pionex-doc.gitbook.io/apidocs/restful/orders/get-fills
 func (t *Trans) GetFills(req *GetFillsReq) (*api.Ret[*GetFillsRes], error) {
-	return getFills.Do(req, t.s, t.c)
+	return t.getFills.Do(req)
 }
 
 // GetFillsByOrderId https://pionex-doc.gitbook.io/apidocs/restful/orders/get-fills-by-order-id
 func (t *Trans) GetFillsByOrderId(req *GetFillsByOrderIdeq) (*api.Ret[*GetFillsRes], error) {
-	return getFillsByOrderId.Do(req, t.s, t.c)
+	return t.getFillsByOrderId.Do(req)
 }
 
 // CancelAllOrders https://pionex-doc.gitbook.io/apidocs/restful/orders/cancel-all-orders
 func (t *Trans) CancelAllOrders(req *CancelAllOrdersReq) (*api.Ret[struct{}], error) {
-	return cancelAllOrders.Do(req, t.s, t.c)
+	return t.cancelAllOrders.Do(req)
 }
 
 func NewTrans(s *api.Singer, c *fasthttp.Client) *Trans {
 	return &Trans{
-		s: s,
-		c: c,
+		newOrder: api.NewApi[*NewOrderReq, *NewOrderRes](
+			http.MethodPost,
+			"/api/v1/trade/order",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		newMultipleOrder: api.NewApi[*NewMultipleOrderReq, *NewMultipleOrderRes](
+			http.MethodPost,
+			"/api/v1/trade/massOrder",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		cancelOrder: api.NewApi[*CancelOrderReq, struct{}](
+			http.MethodDelete,
+			"/api/v1/trade/order",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		getOrder: api.NewApi[*GetOrderReq, *GetOrderRes](
+			http.MethodGet,
+			"/api/v1/trade/order",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		getOrderByClientId: api.NewApi[*GetOrderByClientIdReq, *GetOrderRes](
+			http.MethodGet,
+			"/api/v1/trade/orderByClientOrderId",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		getOpenOrders: api.NewApi[*GetOpenOrdersReq, *OrdersRes](
+			http.MethodGet,
+			"/api/v1/trade/openOrders",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		getAllOrders: api.NewApi[*GetAllOrdersReq, *OrdersRes](
+			http.MethodGet,
+			"/api/v1/trade/allOrders",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		getFills: api.NewApi[*GetFillsReq, *GetFillsRes](
+			http.MethodGet,
+			"/api/v1/trade/fills",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		getFillsByOrderId: api.NewApi[*GetFillsByOrderIdeq, *GetFillsRes](
+			http.MethodGet,
+			"/api/v1/trade/fillsByOrderId",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
+		cancelAllOrders: api.NewApi[*CancelAllOrdersReq, struct{}](
+			http.MethodDelete,
+			"/api/v1/trade/allOrders",
+			api.WithClient(c),
+			api.WithSigner(s),
+		),
 	}
 }

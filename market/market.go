@@ -1,9 +1,10 @@
 package market
 
 import (
+	"net/http"
+
 	"github.com/luanruisong/pionex/api"
 	"github.com/valyala/fasthttp"
-	"net/http"
 )
 
 type (
@@ -123,78 +124,52 @@ type (
 	}
 
 	Market struct {
-		c *fasthttp.Client
-	}
-)
-
-var (
-	symbols = &api.Api[*SymbolsReq, *SymbolsRes]{
-		Method:          http.MethodGet,
-		Path:            "/api/v1/common/symbols",
-		PublicInterface: true,
-	}
-
-	getDepth = &api.Api[*SymbolReq, *GetDepthRes]{
-		Method:          http.MethodGet,
-		Path:            "/api/v1/market/depth",
-		PublicInterface: true,
-	}
-
-	getTrades = &api.Api[*SymbolReq, *GetTradesRes]{
-		Method:          http.MethodGet,
-		Path:            "/api/v1/market/trades",
-		PublicInterface: true,
-	}
-
-	get24hrTicker = &api.Api[*TickerReq, *Get24hrTickerRes]{
-		Method:          http.MethodGet,
-		Path:            "/api/v1/market/tickers",
-		PublicInterface: true,
-	}
-
-	getBookTicker = &api.Api[*TickerReq, *GetBookTickerRes]{
-		Method:          http.MethodGet,
-		Path:            "/api/v1/market/bookTickers",
-		PublicInterface: true,
-	}
-
-	getKline = &api.Api[*GetKlineReq, *GetKlineRes]{
-		Method:          http.MethodGet,
-		Path:            "/api/v1/market/klines",
-		PublicInterface: true,
+		symbols       *api.Api[*SymbolsReq, *SymbolsRes]
+		getDepth      *api.Api[*SymbolReq, *GetDepthRes]
+		getTrades     *api.Api[*SymbolReq, *GetTradesRes]
+		get24hrTicker *api.Api[*TickerReq, *Get24hrTickerRes]
+		getBookTicker *api.Api[*TickerReq, *GetBookTickerRes]
+		getKline      *api.Api[*GetKlineReq, *GetKlineRes]
 	}
 )
 
 // MarketData https://pionex-doc.gitbook.io/apidocs/restful/common/market-data
 func (m *Market) GetSymbols(req *SymbolsReq) (*api.Ret[*SymbolsRes], error) {
-	return symbols.Do(req, nil, m.c)
+	return m.symbols.Do(req)
 }
 
 // GetDepth https://pionex-doc.gitbook.io/apidocs/restful/markets/get-depth
 func (m *Market) GetDepth(req *SymbolReq) (*api.Ret[*GetDepthRes], error) {
-	return getDepth.Do(req, nil, m.c)
+	return m.getDepth.Do(req)
 }
 
 // GetTrades https://pionex-doc.gitbook.io/apidocs/restful/markets/get-trades
 func (m *Market) GetTrades(req *SymbolReq) (*api.Ret[*GetTradesRes], error) {
-	return getTrades.Do(req, nil, m.c)
+	return m.getTrades.Do(req)
 }
 
 // Get24hrTicker https://pionex-doc.gitbook.io/apidocs/restful/markets/get-24hr-ticker
 func (m *Market) Get24hrTicker(req *TickerReq) (*api.Ret[*Get24hrTickerRes], error) {
-	return get24hrTicker.Do(req, nil, m.c)
+	return m.get24hrTicker.Do(req)
 }
 
 // GetBookTicker https://pionex-doc.gitbook.io/apidocs/restful/markets/get-book-ticker
 func (m *Market) GetBookTicker(req *TickerReq) (*api.Ret[*GetBookTickerRes], error) {
-	return getBookTicker.Do(req, nil, m.c)
+	return m.getBookTicker.Do(req)
 }
 
 // GetKline https://pionex-doc.gitbook.io/apidocs/restful/markets/get-klines
 func (m *Market) GetKline(req *GetKlineReq) (*api.Ret[*GetKlineRes], error) {
-	return getKline.Do(req, nil, m.c)
+	return m.getKline.Do(req)
 }
 
 func NewMarket(c *fasthttp.Client) *Market {
-	return &Market{c: c}
+	return &Market{
+		symbols:       api.NewApi[*SymbolsReq, *SymbolsRes](http.MethodGet, "/api/v1/common/symbols", api.WithClient(c)),
+		getDepth:      api.NewApi[*SymbolReq, *GetDepthRes](http.MethodGet, "/api/v1/market/depth", api.WithClient(c)),
+		getTrades:     api.NewApi[*SymbolReq, *GetTradesRes](http.MethodGet, "/api/v1/market/trades", api.WithClient(c)),
+		get24hrTicker: api.NewApi[*TickerReq, *Get24hrTickerRes](http.MethodGet, "/api/v1/market/tickers", api.WithClient(c)),
+		getBookTicker: api.NewApi[*TickerReq, *GetBookTickerRes](http.MethodGet, "/api/v1/market/bookTickers", api.WithClient(c)),
+		getKline:      api.NewApi[*GetKlineReq, *GetKlineRes](http.MethodGet, "/api/v1/market/klines", api.WithClient(c)),
+	}
 }

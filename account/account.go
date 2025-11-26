@@ -1,9 +1,10 @@
 package account
 
 import (
+	"net/http"
+
 	"github.com/luanruisong/pionex/api"
 	"github.com/valyala/fasthttp"
-	"net/http"
 )
 
 type (
@@ -17,26 +18,22 @@ type (
 	}
 
 	Account struct {
-		s *api.Singer
-		c *fasthttp.Client
-	}
-)
-
-var (
-	balancesInfo = &api.Api[any, *BalancesRes]{
-		Method: http.MethodGet,
-		Path:   "/api/v1/account/balances",
+		balancesInfo *api.Api[any, *BalancesRes]
 	}
 )
 
 // BalancesInfo https://pionex-doc.gitbook.io/apidocs/restful/account/get-balance
 func (a *Account) BalancesInfo() (*api.Ret[*BalancesRes], error) {
-	return balancesInfo.Do(nil, a.s, a.c)
+	return a.balancesInfo.Do(nil)
 }
 
 func NewAccount(s *api.Singer, c *fasthttp.Client) *Account {
 	return &Account{
-		s: s,
-		c: c,
+		balancesInfo: api.NewApi[any, *BalancesRes](
+			http.MethodGet,
+			"/api/v1/account/balances",
+			api.WithSigner(s),
+			api.WithClient(c),
+		),
 	}
 }
