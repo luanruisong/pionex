@@ -27,7 +27,7 @@ func init() {
 	formEncoder = form.NewEncoder()
 }
 
-func preParseRequest(req *fasthttp.Request, data any) {
+func preParseRequest(a *api, req *fasthttp.Request, data any) {
 	req.Header.SetMethod(a.Method)
 	req.SetRequestURI(Host)
 	u := req.URI()

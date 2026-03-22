@@ -62,7 +62,9 @@ func NewApi[req, res any](method, path string, opts ...ApiOpts) *Api[req, res] {
 		Method:          method,
 		Path:            path,
 		PublicInterface: true,
-		client:          &fasthttp.Client{},
+		client: &fasthttp.Client{
+			ReadBufferSize: 16 * 1024,
+		},
 	}
 	for _, v := range opts {
 		v(a)
@@ -86,7 +88,7 @@ func (a *api) Do(param, res any) error {
 	}
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
-	preParseRequest(req, param)
+	preParseRequest(a, req, param)
 	if !a.PublicInterface && a.sign == nil {
 		return errors.New("signer is invalid")
 	}
